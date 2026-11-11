@@ -315,7 +315,7 @@ def cmd_mock(args):
     else:
         minutes = args.minutes
         if args.extra_time:
-            minutes = round(minutes * (1 + args.extra_time / 100.0))
+            minutes = -(-minutes * (100 + args.extra_time) // 100)     # round up: 50 min + 25 % = 63
         attempt = workspace.new_mock_attempt(zips[-1])
         info = {"start": time.time(), "end": time.time() + minutes * 60, "minutes": minutes,
                 "zip": os.path.basename(zips[-1])}
