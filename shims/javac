@@ -1,0 +1,24 @@
+#!/bin/bash
+# Windows only (Git Bash): stacscheck's tests export a Linux-style CLASSPATH
+# (.:..:${TESTDIR}/../libs/*). Windows Java wants ';' and C:\ paths, so convert
+# it, then run the real java/javac further down the PATH.
+name=$(basename "$0")
+self=$(cd "$(dirname "$0")" && pwd)
+real=""
+set -f
+IFS=:
+for d in $PATH; do
+  [ "$d" = "$self" ] && continue
+  if [ -f "$d/$name.exe" ]; then real="$d/$name.exe"; break; fi
+done
+unset IFS
+set +f
+if [ -z "$real" ]; then
+  echo "$name not found - install a JDK (cs1002 setup) and open a new terminal" >&2
+  exit 127
+fi
+if [ -n "$CLASSPATH" ] && [[ "$CLASSPATH" != *";"* ]] && command -v cygpath >/dev/null 2>&1; then
+  CLASSPATH=$(cygpath -wp "$CLASSPATH")
+  export CLASSPATH
+fi
+exec "$real" "$@"
